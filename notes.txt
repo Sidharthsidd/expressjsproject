@@ -1,0 +1,9 @@
+what is express and why should we use it ?
+**express is a minimal node,js framework a higher level of abstraction 
+**express contains a very robust set of features complex routing  easier 
+  handling of requests adn respoonses middleware serverside redering etc .
+**express allows for rapid development of node.js applications we dont have to re-invent the wheel 
+**express make it easier to organies our applications into the MVC architecture 
+
+
+postman is the tool that alllows us to test apis 
