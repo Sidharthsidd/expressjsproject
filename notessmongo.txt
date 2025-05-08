@@ -1,0 +1,261 @@
+Mongoose Models and Schemas
+Mongoose models act as a blueprint for creating documents in MongoDB.
+To create a model, we first need a schema, which defines the structure of the document.
+
+
+ Creating Documents and Testing the Model
+javascript
+Copy
+Edit
+const testTour = new Tour({   // 'Tour' should start with a capital letter
+    name: 'The Forest Hiker', // Fixed quotes
+    rating: 4.7,
+    price: 497
+});
+
+testTour.save()  // Saves the document to the database
+    .then(doc => console.log('Tour saved:', doc))
+    .catch(err => console.error('Error saving tour:', err));
+
+
+ Intro to Back-End Architecture: MVC, Types of Logic, and More
+MVC Architecture:
+
+Model → Business Logic (Handles database operations)
+Controller → Application Logic (Manages requests & responses)
+View → Presentation Logic (Handles UI/Frontend display)
+                            model
+request=>router=>controller//
+|                          \\view
+
+
+//////////////////////////////////////////////////
+reading the document fom the mongodb
+
+we use .find() funtion to get all the data from the mnngo database
+
+and findById(req.params.id)  to find from the specific id params.(the name of id want to take from the route)
+
+//updating the documents
+findByIdAndUpdate(req.params.id,req.body) to update the specific query with the update functions
+
+//delete the document
+when there is a delete operation dont send any response to the client in comman practice 
+findByIdAndDelete(req.params.id)
+
+✅ Making the API Better: Filtering Using Query Strings
+
+ Example URL: /tours?duration=5&difficulty=easy
+
+ 🔹 Step 1: Print the query parameters received in the request
+console.log(req.query);  
+ Output: { duration: '5', difficulty: 'easy' }
+
+ 🔹 Step 2: Create a copy of req.query to avoid modifying the original
+const queryObj = { ...req.query };
+
+ 🔹 Step 3: Define fields to exclude from filtering
+const excludeFields = ['page', 'limit', 'sort', 'fields'];
+
+🔹 Step 4: Remove excluded fields from the query object
+excludeFields.forEach(el => delete queryObj[el]);
+
+🔹 Step 5: Use Mongoose to find documents that match the filtered criteria
+const tours = await Tour.find(queryObj);
+
+ 🔸 Alternative: Using Mongoose chaining syntax
+   const tours = await Tour.find()
+   .where('duration').equals('5')
+   .where('difficulty').equals('easy');
+
+
+//Making the API Better: Advanced Filtering
+##  MongoDB Advanced Filtering in Node.js (Express + Mongoose)
+###  Purpose:
+Convert query parameters from URL into MongoDB filter syntax.
+### 🛠 Example URL:
+```
+GET /api/v1/tours?difficulty=easy&duration[gte]=5&price[lt]=1500
+
+#### 3. Advanced filtering (gte, gt, lte, lt)
+let queryStr = JSON.stringify(queryObj);
+queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+
+**This replaces** `gte`, `lt`, etc. → `$gte`, `$lt` (MongoDB syntax)  ,'graterthen' ,'grater' ,'lessthen' 
+#### Example transformation:
+**Before:**
+```js
+{
+  duration: { gte: '5' },
+  price: { lt: '1500' }
+}
+**After:**
+{
+  duration: { $gte: '5' },
+  price: { $lt: '1500' }
+}
+#### 4. Execute the query
+
+const query = Tour.find(JSON.parse(queryStr));
+const tours = await query;
+```
+
+### ✅ Final Output:
+The URL query:
+?difficulty=easy&duration[gte]=5&price[lt]=1500
+Becomes:
+{
+  difficulty: 'easy',
+  duration: { $gte: '5' },
+  price: { $lt: '1500' }
+}
+
+////////Making the API Better: Sorting///////////////
+##  MongoDB Sorting in Node.js (Express + Mongoose)
+###  Purpose:
+To allow users to sort data using query parameters in the URL.
+### 🛠 Example URL:
+
+GET /api/v1/tours?sort=price
+GET /api/v1/tours?sort=-price,ratingsAverage
+
+###  Step-by-Step Breakdown:
+#### 1. Check for `sort` in `req.query`
+
+if (req.query.sort) {
+  const sortBy = req.query.sort.split(',').join(' ');
+  query = query.sort(sortBy);
+}
+
+ `sort=price` becomes `'price'`  
+ `sort=-price,ratingsAverage` becomes `'-price ratingsAverage'`
+- `-price` → descending order by price
+- `ratingsAverage` → ascending order by ratingsAverage
+#### 2. Default sort (if no sort is specified)
+
+else {
+  query = query.sort('-createdAt');
+}
+
+This ensures newest items come first when no sort is provided.
+### Final Result:
+- Sorts results based on fields passed in the URL.
+- MongoDB `.sort()` accepts space-separated fields like:
+```js
+.sort('price ratingsAverage')
+
+
+///////////Making the API Better: Limiting Fields///////
+
+##  Field Limiting (MongoDB + Mongoose)
+
+- Use `?fields=name,price` in URL to return only selected fields.
+- In code:
+if (req.query.fields) {
+  query = query.select(req.query.fields.split(',').join(' '));
+} else {
+  query = query.select('-__v');
+}
+
+- `fields` is not built-in in MongoDB, it's a custom query param.
+- Mongoose `.select()` handles projection.
+
+////////////Making the API Better: Pagination//////
+- Use `?page=2&limit=10` in URL to paginate results.
+- In code:
+
+const page = req.query.page * 1 || 1;
+const limit = req.query.limit * 1 || 100;
+const skip = (page - 1) * limit;
+query = query.skip(skip).limit(limit);
+
+- `skip()` skips docs, `limit()` limits the number returned.
+- Default: page 1, limit 100.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//userModel 
+validator package to validate the email
+email: {
+    type: String,
+    required: [true, 'Please provide your email'],
+    unique: true,
+    lowercase: true,
+    validate: [validator.isEmail, 'Please provide a valid email']
+  },
+
+model Use should be always in the capital letter 
+
+
+126 missing 
+
+
+//Managing Passwords
+.this keyword is not used in the arrow function 
+to use this function normal function should be used 
+validate:{}
+this will work only on save 
+ validator: function(el) {
+        return el === this.password;
+      },
+      message: 'Passwords are not the same!'
+ 
+ it works only
+when create a new object and save 
+
+
+to encryption for the password the model is the best place to implement the password encryption
+so how do we do that
+brute force method can guess the password so we encryt the password  
+*npm i bcrptjs package for pasword 
+useschema.pre('save'),async function(next){
+    if this.isModified('password') return next
+    this.password = await bcrpt.hash(this.password,12)
+
+
+//to delete the comfirm password 
+this.password=undefined //because when user comfirms the password no longer need this function to run again 
+}
+
+
+////Authentication and authorization and security 
+refer the lecture jwt 128 
+how authentication with jwt works
+* the server wont know that who is login but the client side is he knows that he is logged in 
+*jwt token is stored in the local storage of the web 
+*the jwt is decoded on the header,payload and signature 
+
+
+//implementation signing upusers
+to create a jwt token should be enter the secret code with can be 32 letter longer saved in the env file that can be anything which can be secret to identify 
+const token= jwt({id:Userdetails._id} process.env.JWT_SECRET{
+  expries:process.envJWT_EXPIRES
+})
+token header is created automatically 
+
+JWT_EXPIRES= can be defined as 90days=90d , hours =1h,or the minute=1m ,
+passed as a oobject always 
+
+pass to the user after entering evrything 
+res.status(200.json{
+  token{
+    data:{
+      userdata =userdetails
+    }
+  }
+})

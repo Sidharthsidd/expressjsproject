@@ -1,97 +1,106 @@
-what is express and why should we use it ?
-**express is a minimal node,js framework a higher level of abstraction 
-**express contains a very robust set of features complex routing  easier 
-  handling of requests adn respoonses middleware serverside redering etc .
-**express allows for rapid development of node.js applications we dont have to re-invent the wheel 
-**express make it easier to organies our applications into the MVC architecture 
+✅ What is Express and why should we use it?
 
+- Express is a minimal Node.js framework that provides a higher level of abstraction.
+- Express contains a robust set of features like complex routing, easier handling of requests and responses, middleware, server-side rendering, etc.
+- Express allows for rapid development of Node.js applications — we don’t have to reinvent the wheel.
+- Express makes it easier to organize our applications into the MVC (Model-View-Controller) architecture.
 
-postman is the tool that alllows us to test apis 
-///
-app.get():
-This is a method provided by Express (a web framework for Node.js) to define a route for handling HTTP GET requests.
-It takes two parameters: the path ("/" in this case) and a callback function (or handler) that defines the response.
-//
-res.status(200):
-This sets the HTTP status code of the response to 200, which means "OK."
-Other common status codes include 404 (Not Found), 500 (Internal Server Error), etc.
+✅ Postman
 
-//res.json to response in json format 
+Postman is a tool that allows us to test APIs.
 
+✅ app.get()
 
-what is  the api :
-application programming interface a piece of software that can be sued by anouther piece of sofwware in order to allow applications to talk to each other 
+- A method provided by Express to define a route for handling HTTP GET requests.
+- Takes two parameters: the path (e.g., "/") and a callback function (handler) that defines the response.
 
-database=>json=>api=>browsers
+✅ res.status(200)
 
-REST=represental state transfer 
-couple of prijnciples to create a rest apis 
-1. separate api into logical  resource
-2.expose structures resource based urls 
-3.use httpp methods (verbs)
-4.send data as json (usally)
-5.be stateless 
+- Sets the HTTP status code of the response to 200, meaning "OK."
+- Other common status codes: 404 (Not Found), 500 (Internal Server Error), etc.
 
+✅ res.json()
 
-HTTP Methods //
+- Sends the response back in JSON format.
 
-get:Used to retrieve data from a server without modifying it.
-post :Used to send data to the server to create a new resource
-put:Used to update an entire resource on the server with new data
-patch:Used to update part of an existing resource.
-delete:Used to delete a resource from the server.
+✅ What is an API?
 
-sending the data of json file to the client
- res.status(200).json({           
-        status:'success',
-        results:tours.length,
-        data:{
-            tours:tours,       //tours the value is set as specified when the file is synced by readfilesync
-        }})
+API (Application Programming Interface) is a piece of software that can be used by another piece of software to allow applications to communicate with each other.
 
-{ status: 'success' }=>
-The key status is used to give clients a quick indication of whether the request was successful or encountered an error.
-In this case, 'success' implies that the operation completed successfully.
+Flow: Database → JSON → API → Browser
 
-results: tours.length 
-results specifies the number of tour records available.
+✅ REST (Representational State Transfer)
 
-tours.length=> gives the number of items in the tours array, so results holds the count of tours
-data is the main container object for the response’s payload.
+Principles for creating REST APIs:
+1. Separate the API into logical resources.
+2. Expose structured, resource-based URLs.
+3. Use HTTP methods (verbs).
+4. Send data as JSON (usually).
+5. Be stateless.
 
-Inside data, we have { tours: tours }, where=>
-tours on the left side of the colon is the key that the client will see, making it clear that this part of the response contains a list of tours.
-tours on the right side is the actual array of tour data.
+✅ HTTP Methods
 
+- GET: Retrieve data from the server without modifying it.
+- POST: Send data to the server to create a new resource.
+- PUT: Update an entire resource on the server.
+- PATCH: Update part of an existing resource.
+- DELETE: Delete a resource from the server.
 
-////////////////POST REQUEST ////////////
-add middle ware before the post request is made 
+✅ Sending JSON data to the client
+
+res.status(200).json({           
+    status: 'success',
+    results: tours.length,
+    data: {
+        tours: tours
+    }
+})
+
+- status: 'success' → Indicates the request was successful.
+- results: tours.length → Number of tour records.
+- data: { tours: tours } → Payload containing the tours array.
+
+✅ POST request
+
+- Add middleware to parse JSON before the POST request:
 
 app.use(express.json())
-This is useful for logging requests, debugging, or handling common tasks before requests reach your routes.
-app.post("/api/v1/tours",(req,res)=>{
-        // console.log(req.body);
-        const newId =tours[tours.length-1].id+1;
-        const newTour =Object.assign({id:newId},req.body);
-        tours.push(newTour)
-        fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`,JSON.stringify(tours),err=>{res.status(201).json({status:'success',data:{tour:newTour}})})
-        
+
+- Example POST route:
+
+app.post("/api/v1/tours", (req, res) => {
+    const newId = tours[tours.length - 1].id + 1;
+    const newTour = Object.assign({ id: newId }, req.body);
+    tours.push(newTour);
+    fs.writeFile(`${__dirname}/dev-data/data/tours-simple.json`, JSON.stringify(tours), err => {
+        res.status(201).json({
+            status: 'success',
+            data: { tour: newTour }
+        });
+    });
 });
 
-/////generating parameters and reponeding the parameters from url ///////////
+✅ Generating and responding with URL parameters
 
+app.get("/api/v1/tours/:id/:v5?")
 
-app.get("/api/v1/tours/:id/:v5?)  //we write url params by spesifing colon : and any variable or umber after that
-question mark is the optional  purpore which specifys that it can be added or can be ignored 
+- Use a colon (:) followed by the parameter name.
+- The question mark (?) makes the parameter optional.
 
-////handling patch requests////
+✅ Handling PATCH requests
 
-put is used when entire data is updated patch is used when some data items is to  be updated
+- PUT → Update the entire resource.
+- PATCH → Update part of the resource.
 
-////handling delete requests////
-res.status(204).json is use 204 for the status for delete wwe dont send any data back just set it to null
+✅ Handling DELETE requests
 
-//to make the code better and understanding we make the code by making const and add that i the variable 
+res.status(204).json({
+    status: 'success',
+    data: null
+});
 
-///if the route is same for some operations then we sue the route funtion to specify the operation get ,post or patch ,delete ,
+- 204 means "No Content" — don’t send any data back.
 
+✅ Organizing routes
+
+- If the route is the same for multiple operations, use the route() function to group methods like GET, POST, PATCH, DELETE.
